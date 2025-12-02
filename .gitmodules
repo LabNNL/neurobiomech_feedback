@@ -1,0 +1,3 @@
+[submodule "external/neurobiomech_software"]
+	path = external/neurobiomech_software
+	url = https://github.com/LabNNL/neurobiomech_software
