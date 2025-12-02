@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  logging: ^1.3.0
+  frontend_common:
+    path: ../external/neurobiomech_software/frontend_common
 
 dev_dependencies:
   flutter_test:

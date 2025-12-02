@@ -10,7 +10,10 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "foot_angle/lib/main.dart"
+            "program": "foot_angle/lib/main.dart",
+            "toolArgs": [
+                "--dart-define=USE_BACKEND_MOCK=true"
+            ]
         },
     ]
 }
