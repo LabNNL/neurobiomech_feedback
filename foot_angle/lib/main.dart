@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foot_angle/managers/positions_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
 import 'package:frontend_common/managers/neurobio_client.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
       ? await NeurobioClientMock.instance.initialize()
       : await NeurobioClient.instance.initialize();
 
+  await PositionsManager.instance.initialize();
   await PredictionsManager.instance.initialize();
 
   runApp(const MyApp());
@@ -34,10 +36,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: ConfigPage.routeName,
       routes: {
-        ConfigPage.routeName: (context) =>
-            const ConfigPage(title: 'Configuration'),
-        FeedbackPage.routeName: (context) =>
-            const FeedbackPage(title: 'Vise ton pied'),
+        ConfigPage.routeName: (context) => const ConfigPage(),
+        FeedbackPage.routeName: (context) => const FeedbackPage(),
       },
     );
   }
