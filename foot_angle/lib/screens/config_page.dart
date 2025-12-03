@@ -208,7 +208,9 @@ class _ConfigPageState extends State<ConfigPage> {
     // Compute the average voltage over the last second
     final channelIndex = controller.emgIndex;
     final avgVoltage =
-        data.delsysEmg.getData()[channelIndex].reduce((a, b) => a + b) /
+        data.delsysEmg
+            .getData(raw: true)[channelIndex]
+            .reduce((a, b) => a + b) /
         data.delsysEmg.length;
     setState(() {
       controller.voltage = avgVoltage;

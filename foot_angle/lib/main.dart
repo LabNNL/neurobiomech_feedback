@@ -4,6 +4,7 @@ import 'package:foot_angle/screens/config_page.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
 import 'package:frontend_fundamentals/managers/predictions_manager.dart';
+import 'package:frontend_fundamentals/widgets/neurobio_mock_controller_box.dart';
 import 'package:logging/logging.dart';
 
 Future<void> main() async {
@@ -34,6 +35,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
+      builder: (BuildContext context, Widget? child) {
+        return NeurobioMockControllerBox(child: child!);
+      },
       initialRoute: ConfigPage.routeName,
       routes: {
         ConfigPage.routeName: (context) => const ConfigPage(),
