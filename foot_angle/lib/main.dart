@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:foot_angle/managers/positions_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
-import 'package:frontend_common/managers/neurobio_client.dart';
-import 'package:frontend_common/managers/predictions_manager.dart';
+import 'package:frontend_fundamentals/managers/neurobio_client.dart';
+import 'package:frontend_fundamentals/managers/predictions_manager.dart';
 import 'package:logging/logging.dart';
 
 Future<void> main() async {

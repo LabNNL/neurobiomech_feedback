@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:foot_angle/managers/positions_manager.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
-import 'package:frontend_common/managers/neurobio_client.dart';
-import 'package:frontend_common/models/server_command.dart';
+import 'package:frontend_fundamentals/managers/neurobio_client.dart';
+import 'package:frontend_fundamentals/models/server_command.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('ConfigPage');

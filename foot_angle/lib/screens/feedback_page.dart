@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foot_angle/managers/positions_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
-import 'package:frontend_common/managers/neurobio_client.dart';
+import 'package:frontend_fundamentals/managers/neurobio_client.dart';
 
 class FeedbackPage extends StatefulWidget {
   static const String routeName = '/feedback';
