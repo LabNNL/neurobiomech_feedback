@@ -138,8 +138,7 @@ class _ConfigPageState extends State<ConfigPage> {
         SizedBox(height: 8),
         ElevatedButton(
           onPressed: _neurobioClient.isConnected && !_isBusy
-              ? () async =>
-                    await _doSomething(() => _setLowerFootVoltage(controller))
+              ? () async => await _doSomething(() => _setVoltage(controller))
               : null,
           child: Text('Mesurer'),
         ),
@@ -177,7 +176,7 @@ class _ConfigPageState extends State<ConfigPage> {
     await _neurobioClient.disconnect();
   }
 
-  Future<void> _setLowerFootVoltage(PositionController controller) async {
+  Future<void> _setVoltage(PositionController controller) async {
     if (!_neurobioClient.isConnected ||
         !_neurobioClient.isConnectedToDelsysEmg) {
       _showErrorSnackBar(
