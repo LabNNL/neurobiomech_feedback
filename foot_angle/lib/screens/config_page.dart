@@ -153,7 +153,7 @@ class _ConfigPageState extends State<ConfigPage> {
                             await _doSomething(() => _setVoltage(controller))
                       : null,
                   child: Text(
-                    controller.angle == null ? 'Mesurer' : 'Re-mesurer',
+                    controller.voltage == null ? 'Mesurer' : 'Re-mesurer',
                   ),
                 ),
               ),
@@ -224,13 +224,6 @@ class _ConfigPageState extends State<ConfigPage> {
     await Future.delayed(Duration(seconds: 1, milliseconds: 200));
 
     final data = _neurobioClient.liveAnalogsData.copy();
-    if (data.isEmpty) {
-      _showErrorSnackBar(
-        'Impossible de prendre la mesure : aucune donnée reçue du serveur neurobiomech',
-      );
-      return;
-    }
-
     data.dropBefore(startTime);
     data.dropAfter(startTime.add(Duration(seconds: 1)));
     if (data.isEmpty) {

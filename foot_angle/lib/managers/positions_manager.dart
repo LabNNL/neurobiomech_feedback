@@ -28,13 +28,31 @@ class PositionsManager {
     _isInitialized = true;
   }
 
-  final lowestLeftFoot = AnalogPositionController(emgIndex: 0);
-  final highestLeftFoot = AnalogPositionController(emgIndex: 0);
-  final targetLeftFoot = PositionController(emgIndex: 0);
+  int get leftFootEmgIndex => 0;
+  late final lowestLeftFoot = AnalogPositionController(
+    emgIndex: leftFootEmgIndex,
+  );
+  late final highestLeftFoot = AnalogPositionController(
+    emgIndex: leftFootEmgIndex,
+  );
+  late final targetLeftFoot = PositionController(emgIndex: leftFootEmgIndex);
+  double leftAngleFromVoltage(double voltage) =>
+      _angleFromVoltage(voltage, lowestLeftFoot, highestLeftFoot);
+  double leftVoltageFromAngle(double angle) =>
+      _voltageFromAngle(angle, lowestLeftFoot, highestLeftFoot);
 
-  final lowestRightFoot = AnalogPositionController(emgIndex: 1);
-  final highestRightFoot = AnalogPositionController(emgIndex: 1);
-  final targetRightFoot = PositionController(emgIndex: 1);
+  int get rightFootEmgIndex => 1;
+  late final lowestRightFoot = AnalogPositionController(
+    emgIndex: rightFootEmgIndex,
+  );
+  late final highestRightFoot = AnalogPositionController(
+    emgIndex: rightFootEmgIndex,
+  );
+  late final targetRightFoot = PositionController(emgIndex: rightFootEmgIndex);
+  double rightAngleFromVoltage(double voltage) =>
+      _angleFromVoltage(voltage, lowestRightFoot, highestRightFoot);
+  double rightVoltageFromAngle(double angle) =>
+      _voltageFromAngle(angle, lowestRightFoot, highestRightFoot);
 
   bool get isConfigured {
     if (!_isInitialized) {
@@ -50,4 +68,52 @@ class PositionsManager {
         highestRightFoot.hasValue &&
         targetRightFoot.hasValue;
   }
+}
+
+double _voltageFromAngle(
+  double angle,
+  AnalogPositionController lowest,
+  AnalogPositionController highest,
+) {
+  if (lowest.voltage == null ||
+      highest.voltage == null ||
+      lowest.angle == null ||
+      highest.angle == null) {
+    throw Exception('Positions are not fully configured.');
+  }
+
+  // Example linear mapping; adjust as needed
+  final minVoltage = lowest.voltage!;
+  final maxVoltage = highest.voltage!;
+  final minAngle = lowest.angle!;
+  final maxAngle = highest.angle!;
+
+  return (angle - minAngle) *
+          (maxVoltage - minVoltage) /
+          (maxAngle - minAngle) +
+      minVoltage;
+}
+
+double _angleFromVoltage(
+  double voltage,
+  AnalogPositionController lowest,
+  AnalogPositionController highest,
+) {
+  if (lowest.voltage == null ||
+      highest.voltage == null ||
+      lowest.angle == null ||
+      highest.angle == null) {
+    throw Exception('Positions are not fully configured.');
+  }
+
+  // Example linear mapping; adjust as needed
+  final minVoltage = lowest.voltage!;
+  final maxVoltage = highest.voltage!;
+  final minAngle = lowest.angle!;
+  final maxAngle = highest.angle!;
+
+  return (voltage - minVoltage) *
+          (maxAngle - minAngle) /
+          (maxVoltage - minVoltage) +
+      minAngle;
 }
