@@ -59,6 +59,21 @@ class _ConfigPageState extends State<ConfigPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildSetPosition(
+                      controller: _positionManager.lowestLeftFoot,
+                      title: 'Position minimale du pied gauche',
+                    ),
+                    SizedBox(width: 20),
+                    _buildSetPosition(
+                      controller: _positionManager.lowestRightFoot,
+                      title: 'Position minimale du pied droit',
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildSetPosition(
                       controller: _positionManager.highestLeftFoot,
                       title: 'Position maximale du pied gauche',
                     ),
@@ -74,13 +89,13 @@ class _ConfigPageState extends State<ConfigPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildSetPosition(
-                      controller: _positionManager.lowestLeftFoot,
-                      title: 'Position minimale du pied gauche',
+                      controller: _positionManager.targetLeftFoot,
+                      title: 'Position cible du pied gauche',
                     ),
                     SizedBox(width: 20),
                     _buildSetPosition(
-                      controller: _positionManager.lowestRightFoot,
-                      title: 'Position minimale du pied droit',
+                      controller: _positionManager.targetRightFoot,
+                      title: 'Position cible du pied droit',
                     ),
                   ],
                 ),
@@ -108,41 +123,60 @@ class _ConfigPageState extends State<ConfigPage> {
     required PositionController controller,
     required String title,
   }) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: !_neurobioClient.isConnected
-                ? Colors.grey
-                : controller.voltage == null
-                ? Colors.red
-                : Colors.green,
-          ),
-        ),
-        SizedBox(
-          width: 120,
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Angle (degrés)',
-              suffixText: '°',
+    bool isAnalog = controller is AnalogPositionController;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: !_neurobioClient.isConnected
+                    ? Colors.grey
+                    : (isAnalog && controller.voltage == null)
+                    ? Colors.red
+                    : Colors.green,
+              ),
             ),
-            initialValue: controller.angle?.toString() ?? '',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (value) {
-              final angle = double.tryParse(value);
-              setState(() => controller.angle = angle);
-            },
-          ),
+            if (isAnalog)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: ElevatedButton(
+                  onPressed: _neurobioClient.isConnected && !_isBusy
+                      ? () async =>
+                            await _doSomething(() => _setVoltage(controller))
+                      : null,
+                  child: Text(
+                    controller.angle == null ? 'Mesurer' : 'Re-mesurer',
+                  ),
+                ),
+              ),
+            SizedBox(
+              width: 120,
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Angle (degrés)',
+                  suffixText: '°',
+                ),
+                initialValue: controller.angle?.toString() ?? '',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (value) {
+                  final angle = double.tryParse(value);
+                  setState(() => controller.angle = angle);
+                },
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: _neurobioClient.isConnected && !_isBusy
-              ? () async => await _doSomething(() => _setVoltage(controller))
-              : null,
-          child: Text('Mesurer'),
-        ),
-      ],
+      ),
     );
   }
 
@@ -176,7 +210,7 @@ class _ConfigPageState extends State<ConfigPage> {
     await _neurobioClient.disconnect();
   }
 
-  Future<void> _setVoltage(PositionController controller) async {
+  Future<void> _setVoltage(AnalogPositionController controller) async {
     if (!_neurobioClient.isConnected ||
         !_neurobioClient.isConnectedToDelsysEmg) {
       _showErrorSnackBar(

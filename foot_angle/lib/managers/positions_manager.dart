@@ -3,9 +3,16 @@ class PositionController {
 
   int emgIndex;
 
-  double? voltage;
   double? angle;
-  bool get hasPosition => voltage != null && angle != null;
+  bool get hasValue => angle != null;
+}
+
+class AnalogPositionController extends PositionController {
+  AnalogPositionController({required super.emgIndex});
+
+  double? voltage;
+  @override
+  bool get hasValue => voltage != null && angle != null;
 }
 
 class PositionsManager {
@@ -21,10 +28,13 @@ class PositionsManager {
     _isInitialized = true;
   }
 
-  final highestLeftFoot = PositionController(emgIndex: 0);
-  final highestRightFoot = PositionController(emgIndex: 1);
-  final lowestLeftFoot = PositionController(emgIndex: 0);
-  final lowestRightFoot = PositionController(emgIndex: 1);
+  final lowestLeftFoot = AnalogPositionController(emgIndex: 0);
+  final highestLeftFoot = AnalogPositionController(emgIndex: 0);
+  final targetLeftFoot = PositionController(emgIndex: 0);
+
+  final lowestRightFoot = AnalogPositionController(emgIndex: 1);
+  final highestRightFoot = AnalogPositionController(emgIndex: 1);
+  final targetRightFoot = PositionController(emgIndex: 1);
 
   bool get isConfigured {
     if (!_isInitialized) {
@@ -33,9 +43,11 @@ class PositionsManager {
       );
     }
 
-    return highestLeftFoot.hasPosition &&
-        highestRightFoot.hasPosition &&
-        lowestLeftFoot.hasPosition &&
-        lowestRightFoot.hasPosition;
+    return lowestLeftFoot.hasValue &&
+        highestLeftFoot.hasValue &&
+        targetLeftFoot.hasValue &&
+        lowestRightFoot.hasValue &&
+        highestRightFoot.hasValue &&
+        targetRightFoot.hasValue;
   }
 }
