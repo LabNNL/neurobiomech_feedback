@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:foot_angle/managers/positions_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
+import 'package:foot_angle/screens/foot_and_leg.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
 
 class FeedbackPage extends StatefulWidget {
   static const String routeName = '/feedback';
 
-  const FeedbackPage({super.key});
+  const FeedbackPage({super.key, this.showDebugInformation = false});
+
+  final bool showDebugInformation;
 
   @override
   State<FeedbackPage> createState() => _FeedbackPageState();
@@ -60,16 +63,49 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
+    final feetSizeFactor = widget.showDebugInformation ? 0.6 : 0.8;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Vise ton pied'),
       ),
-      body: Column(
-        children: [
-          _DebugInformation(leftData: _leftData, rightData: _rightData),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FootAndLeg(
+                    side: FootAndLegSide.left,
+                    angle: _positionManager.leftAngleFromVoltage(_leftData),
+                    targetAngle: _positionManager.targetLeftFoot.angle ?? 0.0,
+                    errorTolerance: 15,
+                    acceptedColor: Colors.green,
+                    refusedColor: Colors.red,
+                    height: MediaQuery.of(context).size.height * feetSizeFactor,
+                  ),
+                  FootAndLeg(
+                    side: FootAndLegSide.right,
+                    angle: _positionManager.rightAngleFromVoltage(_rightData),
+                    targetAngle: _positionManager.targetRightFoot.angle ?? 0.0,
+                    errorTolerance: 15,
+                    acceptedColor: Colors.green,
+                    refusedColor: Colors.red,
+                    height: MediaQuery.of(context).size.height * feetSizeFactor,
+                  ),
+                ],
+              ),
+            ),
+            if (widget.showDebugInformation)
+              _DebugInformation(leftData: _leftData, rightData: _rightData),
+          ],
+        ),
       ),
+      drawer: Drawer(width: 500, child: ConfigPage(isDrawer: true)),
     );
   }
 }

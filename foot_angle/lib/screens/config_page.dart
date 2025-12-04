@@ -12,7 +12,9 @@ final _logger = Logger('ConfigPage');
 class ConfigPage extends StatefulWidget {
   static const String routeName = '/config';
 
-  const ConfigPage({super.key});
+  const ConfigPage({super.key, this.isDrawer = false});
+
+  final bool isDrawer;
 
   @override
   State<ConfigPage> createState() => _ConfigPageState();
@@ -104,14 +106,23 @@ class _ConfigPageState extends State<ConfigPage> {
             SizedBox(height: 40),
             ElevatedButton(
               onPressed:
-                  _neurobioClient.isConnected && !_isBusy && _isFullyConfigured
+                  widget.isDrawer ||
+                      (_neurobioClient.isConnected &&
+                          !_isBusy &&
+                          _isFullyConfigured)
                   ? () {
-                      Navigator.of(
-                        context,
-                      ).pushReplacementNamed(FeedbackPage.routeName);
+                      if (widget.isDrawer) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(
+                          context,
+                        ).pushReplacementNamed(FeedbackPage.routeName);
+                      }
                     }
                   : null,
-              child: const Text('Aller à la page de feedback'),
+              child: Text(
+                widget.isDrawer ? 'Fermer' : 'Aller à la page de feedback',
+              ),
             ),
           ],
         ),
