@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return NeurobioMockControllerBox(child: child!);
       },
-      initialRoute: ConfigPage.routeName,
+      initialRoute: FeedbackPage.routeName,
       routes: {
         ConfigPage.routeName: (context) => const ConfigPage(),
         FeedbackPage.routeName: (context) => const FeedbackPage(),

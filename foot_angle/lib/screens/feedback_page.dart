@@ -16,6 +16,7 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _neurobioClient = NeurobioClient.instance;
   final _positionManager = PositionsManager.instance;
 
@@ -27,6 +28,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
     super.initState();
 
     _neurobioClient.onNewLiveAnalogsData.addListener(_onNewData);
+
+    // On start, open the drawer where configuration can be done
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scaffoldKey.currentState?.openDrawer();
+    });
   }
 
   @override
@@ -66,6 +72,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final feetSizeFactor = widget.showDebugInformation ? 0.6 : 0.8;
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Vise ton pied'),

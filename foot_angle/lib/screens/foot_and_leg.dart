@@ -81,7 +81,7 @@ class FootAndLeg extends StatelessWidget {
       left: 25,
       top: 430,
       child: Transform.rotate(
-        angle: -angle * pi / 180,
+        angle: angle.isFinite ? -angle * pi / 180 : 0,
         origin: const Offset(-130, -70),
         child: Opacity(
           opacity: opacity,

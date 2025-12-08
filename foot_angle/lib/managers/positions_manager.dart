@@ -103,7 +103,7 @@ double _angleFromVoltage(
       highest.voltage == null ||
       lowest.angle == null ||
       highest.angle == null) {
-    throw Exception('Positions are not fully configured.');
+    return double.nan;
   }
 
   // Example linear mapping; adjust as needed
@@ -111,6 +111,7 @@ double _angleFromVoltage(
   final maxVoltage = highest.voltage!;
   final minAngle = lowest.angle!;
   final maxAngle = highest.angle!;
+  if (maxVoltage - minVoltage == 0) return double.nan;
 
   return (voltage - minVoltage) *
           (maxAngle - minAngle) /
