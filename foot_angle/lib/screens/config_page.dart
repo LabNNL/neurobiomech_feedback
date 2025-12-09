@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:foot_angle/managers/joints_manager.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
@@ -68,12 +69,12 @@ class _ConfigPageState extends State<ConfigPage> {
                 children: [
                   _buildJointSetters(
                     controller: _jointsManager.left,
-                    titleSuffix: 'du pied gauche',
+                    titleSuffix: 'de la cheville gauche',
                   ),
                   SizedBox(width: 20),
                   _buildJointSetters(
                     controller: _jointsManager.right,
-                    titleSuffix: 'du pied droit',
+                    titleSuffix: 'de la cheville droite',
                   ),
                 ],
               ),
@@ -112,23 +113,31 @@ class _ConfigPageState extends State<ConfigPage> {
       children: [
         _buildSetIsEnabled(
           controller: controller,
-          title: 'Activer $titleSuffix',
+          title: 'Utilisation $titleSuffix',
         ),
-        _buildSetAngle(
+        _buildSetChannelIndex(
+          controller: controller,
+          titleSuffix: 'Canal $titleSuffix',
+        ),
+        SizedBox(height: 10),
+        _buildSetAnalog(
           channelIndex: controller.analogIndex,
           controller: controller.lowest,
+          isEnabled: controller.isEnabled,
           title: 'Angle minimal $titleSuffix',
         ),
         SizedBox(height: 10),
-        _buildSetAngle(
+        _buildSetAnalog(
           channelIndex: controller.analogIndex,
           controller: controller.highest,
+          isEnabled: controller.isEnabled,
           title: 'Angle maximal $titleSuffix',
         ),
         SizedBox(height: 10),
-        _buildSetAngle(
+        _buildSetTarget(
           channelIndex: controller.analogIndex,
           controller: controller.target,
+          isEnabled: controller.isEnabled,
           title: 'Angle cible $titleSuffix',
         ),
       ],
@@ -139,27 +148,55 @@ class _ConfigPageState extends State<ConfigPage> {
     required JointController controller,
     required String title,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Checkbox(
-          value: controller.isEnabled,
-          onChanged: (value) {
-            setState(() => controller.isEnabled = value ?? false);
-          },
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          setState(() => controller.isEnabled = !controller.isEnabled);
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(
+              value: controller.isEnabled,
+              onChanged: (value) {
+                setState(() => controller.isEnabled = value ?? false);
+              },
+            ),
+            Text(title),
+          ],
         ),
-        Text(title),
-      ],
+      ),
     );
   }
 
-  Widget _buildSetAngle({
+  Widget _buildSetChannelIndex({
+    required JointController controller,
+    required String titleSuffix,
+  }) {
+    return SizedBox(
+      width: 60,
+      child: TextFormField(
+        decoration: InputDecoration(labelText: 'Canal'),
+        initialValue: controller.analogIndex.toString(),
+        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          final index = int.tryParse(value);
+          if (index != null) {
+            setState(() => controller.analogIndex = index);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildSetAnalog({
     required int channelIndex,
-    required AngleController controller,
+    required bool isEnabled,
+    required AnalogAngleController controller,
     required String title,
   }) {
-    bool isAnalog = controller is AnalogAngleController;
-
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
@@ -172,37 +209,84 @@ class _ConfigPageState extends State<ConfigPage> {
             Text(
               title,
               style: TextStyle(
-                color: !_neurobioClient.isConnected
+                color: !_neurobioClient.isConnected || !isEnabled
                     ? Colors.grey
-                    : (isAnalog && controller.voltage == null)
+                    : (controller.voltage == null)
                     ? Colors.red
                     : Colors.green,
               ),
             ),
-            if (isAnalog)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: ElevatedButton(
-                  onPressed: _neurobioClient.isConnected && !_isBusy
-                      ? () async => await _doSomething(
-                          () => _setVoltage(
-                            channelIndex: channelIndex,
-                            controller: controller,
-                          ),
-                        )
-                      : null,
-                  child: Text(
-                    controller.voltage == null ? 'Mesurer' : 'Re-mesurer',
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: ElevatedButton(
+                onPressed: _neurobioClient.isConnected && !_isBusy && isEnabled
+                    ? () async => await _doSomething(
+                        () => _setVoltage(
+                          channelIndex: channelIndex,
+                          controller: controller,
+                        ),
+                      )
+                    : null,
+                child: Text(
+                  controller.voltage == null ? 'Mesurer' : 'Re-mesurer',
                 ),
               ),
+            ),
             SizedBox(
-              width: 120,
+              width: 60,
               child: TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Angle (degrés)',
+                  labelText: 'Angle',
                   suffixText: '°',
                 ),
+                enabled: isEnabled,
+                initialValue: controller.angle?.toString() ?? '',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (value) {
+                  final angle = double.tryParse(value);
+                  setState(() => controller.angle = angle);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetTarget({
+    required int channelIndex,
+    required AngleController controller,
+    required bool isEnabled,
+    required String title,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: !_neurobioClient.isConnected || !isEnabled
+                    ? Colors.grey
+                    : Colors.green,
+              ),
+            ),
+            SizedBox(
+              width: 60,
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Angle',
+                  suffixText: '°',
+                ),
+                enabled: isEnabled,
                 initialValue: controller.angle?.toString() ?? '',
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,

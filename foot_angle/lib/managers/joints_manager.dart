@@ -84,6 +84,7 @@ class JointsManager {
       );
     }
 
-    return left.hasValue && right.hasValue;
+    return (!left.isEnabled || left.hasValue) &&
+        (!right.isEnabled || right.hasValue);
   }
 }

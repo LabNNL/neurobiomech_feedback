@@ -84,24 +84,28 @@ class _FeedbackPageState extends State<FeedbackPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  FootAndLeg(
-                    side: FootAndLegSide.left,
-                    angle: _jointsManager.left.angleFromVoltage(_leftData),
-                    targetAngle: _jointsManager.left.target.angle ?? 0.0,
-                    errorTolerance: 15,
-                    acceptedColor: Colors.green,
-                    refusedColor: Colors.red,
-                    height: MediaQuery.of(context).size.height * feetSizeFactor,
-                  ),
-                  FootAndLeg(
-                    side: FootAndLegSide.right,
-                    angle: _jointsManager.right.angleFromVoltage(_rightData),
-                    targetAngle: _jointsManager.right.target.angle ?? 0.0,
-                    errorTolerance: 15,
-                    acceptedColor: Colors.green,
-                    refusedColor: Colors.red,
-                    height: MediaQuery.of(context).size.height * feetSizeFactor,
-                  ),
+                  if (_jointsManager.left.isEnabled)
+                    FootAndLeg(
+                      side: FootAndLegSide.left,
+                      angle: _jointsManager.left.angleFromVoltage(_leftData),
+                      targetAngle: _jointsManager.left.target.angle ?? 0.0,
+                      errorTolerance: 15,
+                      acceptedColor: Colors.green,
+                      refusedColor: Colors.red,
+                      height:
+                          MediaQuery.of(context).size.height * feetSizeFactor,
+                    ),
+                  if (_jointsManager.right.isEnabled)
+                    FootAndLeg(
+                      side: FootAndLegSide.right,
+                      angle: _jointsManager.right.angleFromVoltage(_rightData),
+                      targetAngle: _jointsManager.right.target.angle ?? 0.0,
+                      errorTolerance: 15,
+                      acceptedColor: Colors.green,
+                      refusedColor: Colors.red,
+                      height:
+                          MediaQuery.of(context).size.height * feetSizeFactor,
+                    ),
                 ],
               ),
             ),

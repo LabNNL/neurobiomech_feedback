@@ -7,11 +7,8 @@ import 'package:frontend_fundamentals/managers/predictions_manager.dart';
 import 'package:frontend_fundamentals/widgets/neurobio_mock_controller_box.dart';
 import 'package:logging/logging.dart';
 
-// TODO Add changing channels
 // TODO Add std to target
 // TODO Add knee
-// TODO Add hide one leg (checkbox)
-// TODO Fix if smaller is higher than bigger
 
 Future<void> main() async {
   // Configure logging
@@ -47,7 +44,8 @@ class MyApp extends StatelessWidget {
       initialRoute: FeedbackPage.routeName,
       routes: {
         ConfigPage.routeName: (context) => const ConfigPage(),
-        FeedbackPage.routeName: (context) => const FeedbackPage(),
+        FeedbackPage.routeName: (context) =>
+            const FeedbackPage(showDebugInformation: true),
       },
     );
   }
