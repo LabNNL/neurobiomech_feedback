@@ -28,6 +28,8 @@ class JointPainter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final adjustedAngle = angle * joint.directionModifier;
+
     return Transform.flip(
       flipX: controller.side == Side.left,
       child: ConstraintsTransformBox(
@@ -40,14 +42,14 @@ class JointPainter extends StatelessWidget {
           child: switch (joint) {
             Joint.ankle => _AnklePainter(
               controller: controller,
-              angle: angle,
+              angle: adjustedAngle,
               acceptedColor: acceptedColor,
               almostColor: almostColor,
               refusedColor: refusedColor,
             ),
             Joint.knee => _KneePainter(
               controller: controller,
-              angle: angle,
+              angle: adjustedAngle,
               acceptedColor: acceptedColor,
               almostColor: almostColor,
               refusedColor: refusedColor,

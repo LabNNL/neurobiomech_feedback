@@ -21,6 +21,24 @@ enum Joint {
         return 'du genou ${side == Side.left ? 'gauche' : 'droit'}';
     }
   }
+
+  String get direction {
+    switch (this) {
+      case Joint.ankle:
+        return 'Dorsiflexion (+) / Plantiflexion (-)';
+      case Joint.knee:
+        return 'Flexion (+) / Extension (-)';
+    }
+  }
+
+  double get directionModifier {
+    switch (this) {
+      case Joint.ankle:
+        return -1.0;
+      case Joint.knee:
+        return 1.0;
+    }
+  }
 }
 
 class AngleController {

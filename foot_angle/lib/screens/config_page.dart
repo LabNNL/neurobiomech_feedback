@@ -83,6 +83,7 @@ class _ConfigPageState extends State<ConfigPage> {
                   }
                 },
               ),
+              Text(_jointsManager.joint.direction),
               SizedBox(height: 20),
               Row(
                 mainAxisSize: MainAxisSize.min,
