@@ -89,8 +89,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
                       side: FootAndLegSide.left,
                       angle: _jointsManager.left.angleFromVoltage(_leftData),
                       targetAngle: _jointsManager.left.target.angle ?? 0.0,
-                      errorTolerance: 15,
+                      acceptedTolerance: _jointsManager.left.target.tolerance,
+                      almostTolerance:
+                          _jointsManager.left.target.almostTolerance,
                       acceptedColor: Colors.green,
+                      almostColor: Colors.orange,
                       refusedColor: Colors.red,
                       height:
                           MediaQuery.of(context).size.height * feetSizeFactor,
@@ -100,8 +103,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
                       side: FootAndLegSide.right,
                       angle: _jointsManager.right.angleFromVoltage(_rightData),
                       targetAngle: _jointsManager.right.target.angle ?? 0.0,
-                      errorTolerance: 15,
+                      acceptedTolerance: _jointsManager.right.target.tolerance,
+                      almostTolerance:
+                          _jointsManager.right.target.almostTolerance,
                       acceptedColor: Colors.green,
+                      almostColor: Colors.orange,
                       refusedColor: Colors.red,
                       height:
                           MediaQuery.of(context).size.height * feetSizeFactor,

@@ -1,5 +1,5 @@
 class AngleController {
-  AngleController();
+  AngleController({this.angle});
 
   double? angle;
   bool get hasValue => angle != null;
@@ -13,6 +13,17 @@ class AnalogAngleController extends AngleController {
   bool get hasValue => voltage != null && angle != null;
 }
 
+class TargetAngleController extends AngleController {
+  TargetAngleController({
+    required super.angle,
+    required this.tolerance,
+    required this.almostTolerance,
+  });
+
+  double tolerance;
+  double almostTolerance;
+}
+
 class JointController {
   JointController({required this.analogIndex});
 
@@ -21,7 +32,11 @@ class JointController {
 
   late final lowest = AnalogAngleController();
   late final highest = AnalogAngleController();
-  late final target = AngleController();
+  late final target = TargetAngleController(
+    angle: 0,
+    tolerance: 15,
+    almostTolerance: 30,
+  );
 
   bool get hasValue => lowest.hasValue && highest.hasValue && target.hasValue;
 

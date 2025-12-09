@@ -7,7 +7,6 @@ import 'package:frontend_fundamentals/managers/predictions_manager.dart';
 import 'package:frontend_fundamentals/widgets/neurobio_mock_controller_box.dart';
 import 'package:logging/logging.dart';
 
-// TODO Add std to target
 // TODO Add knee
 
 Future<void> main() async {

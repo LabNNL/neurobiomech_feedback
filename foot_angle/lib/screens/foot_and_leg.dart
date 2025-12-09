@@ -10,8 +10,10 @@ class FootAndLeg extends StatelessWidget {
     required this.side,
     required this.angle,
     required this.targetAngle,
-    required this.errorTolerance,
+    required this.acceptedTolerance,
+    required this.almostTolerance,
     this.acceptedColor = Colors.green,
+    this.almostColor = Colors.orange,
     this.refusedColor = Colors.red,
     this.width,
     this.height,
@@ -21,8 +23,10 @@ class FootAndLeg extends StatelessWidget {
 
   final double angle;
   final double targetAngle;
-  final double errorTolerance;
+  final double acceptedTolerance;
+  final double almostTolerance;
   final Color acceptedColor;
+  final Color almostColor;
   final Color refusedColor;
 
   final double? width;
@@ -34,8 +38,12 @@ class FootAndLeg extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAccepted =
-        (angle >= targetAngle - errorTolerance) &&
-        (angle <= targetAngle + errorTolerance);
+        (angle >= targetAngle - acceptedTolerance) &&
+        (angle <= targetAngle + acceptedTolerance);
+    final isAlmost =
+        !isAccepted &&
+        (angle >= targetAngle - almostTolerance) &&
+        (angle <= targetAngle + almostTolerance);
 
     return Transform.flip(
       flipX: side == FootAndLegSide.left,
@@ -59,7 +67,9 @@ class FootAndLeg extends StatelessWidget {
                     //_buildFoot(angle: targetAngle, opacity: 0.4),
                     _buildFoot(
                       angle: targetAngle,
-                      color: isAccepted ? acceptedColor : refusedColor,
+                      color: isAccepted
+                          ? acceptedColor
+                          : (isAlmost ? almostColor : refusedColor),
                       opacity: 0.4,
                     ),
                   ],

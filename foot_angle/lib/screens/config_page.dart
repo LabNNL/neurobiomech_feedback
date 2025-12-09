@@ -258,7 +258,7 @@ class _ConfigPageState extends State<ConfigPage> {
 
   Widget _buildSetTarget({
     required int channelIndex,
-    required AngleController controller,
+    required TargetAngleController controller,
     required bool isEnabled,
     required String title,
   }) {
@@ -279,23 +279,77 @@ class _ConfigPageState extends State<ConfigPage> {
                     : Colors.green,
               ),
             ),
-            SizedBox(
-              width: 60,
-              child: TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Angle',
-                  suffixText: '°',
+            Row(
+              children: [
+                SizedBox(
+                  width: 60,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Angle',
+                      suffixText: '°',
+                    ),
+                    enabled: isEnabled,
+                    initialValue: controller.angle?.toString() ?? '',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (value) {
+                      final angle = double.tryParse(value);
+                      setState(() => controller.angle = angle);
+                    },
+                  ),
                 ),
-                enabled: isEnabled,
-                initialValue: controller.angle?.toString() ?? '',
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                SizedBox(width: 20),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: 70,
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Succès',
+                          prefix: Text('± '),
+                          suffixText: '°',
+                        ),
+                        enabled: isEnabled,
+                        initialValue: controller.tolerance.toString(),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (value) {
+                          final tolerance = double.tryParse(value);
+                          if (tolerance != null) {
+                            setState(() => controller.tolerance = tolerance);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 70,
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Acceptable',
+                          prefix: Text('± '),
+                          suffixText: '°',
+                        ),
+                        enabled: isEnabled,
+                        initialValue: controller.almostTolerance.toString(),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (value) {
+                          final almostTolerance = double.tryParse(value);
+                          if (almostTolerance != null) {
+                            setState(
+                              () =>
+                                  controller.almostTolerance = almostTolerance,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                onChanged: (value) {
-                  final angle = double.tryParse(value);
-                  setState(() => controller.angle = angle);
-                },
-              ),
+              ],
             ),
           ],
         ),
