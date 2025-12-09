@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:foot_angle/managers/positions_manager.dart';
+import 'package:foot_angle/managers/joints_manager.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
 import 'package:frontend_fundamentals/models/server_command.dart';
@@ -22,10 +22,10 @@ class ConfigPage extends StatefulWidget {
 
 class _ConfigPageState extends State<ConfigPage> {
   final _neurobioClient = NeurobioClient.instance;
-  final _positionManager = PositionsManager.instance;
+  final _jointsManager = JointsManager.instance;
 
   bool get _isFullyConfigured =>
-      _neurobioClient.isConnected && _positionManager.isConfigured;
+      _neurobioClient.isConnected && _jointsManager.isConfigured;
 
   @override
   Widget build(BuildContext context) {
@@ -33,108 +33,132 @@ class _ConfigPageState extends State<ConfigPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Configuration'),
+        actions: [
+          if (widget.isDrawer)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+        ],
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 20),
-            Text('Connexion au serveur neurobiomech'),
-            SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: !_isBusy
-                  ? () async => await _doSomething(
-                      (_neurobioClient.isConnected
-                          ? _disconnectServer
-                          : _connectServer),
-                    )
-                  : null,
-              child: Text(
-                _neurobioClient.isConnected ? 'Déconnexion' : 'Connexion',
+      body: SingleChildScrollView(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 20),
+              Text('Connexion au serveur neurobiomech'),
+              SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: !_isBusy
+                    ? () async => await _doSomething(
+                        (_neurobioClient.isConnected
+                            ? _disconnectServer
+                            : _connectServer),
+                      )
+                    : null,
+                child: Text(
+                  _neurobioClient.isConnected ? 'Déconnexion' : 'Connexion',
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Column(
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildSetPosition(
-                      controller: _positionManager.lowestLeftFoot,
-                      title: 'Position minimale du pied gauche',
-                    ),
-                    SizedBox(width: 20),
-                    _buildSetPosition(
-                      controller: _positionManager.lowestRightFoot,
-                      title: 'Position minimale du pied droit',
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildSetPosition(
-                      controller: _positionManager.highestLeftFoot,
-                      title: 'Position maximale du pied gauche',
-                    ),
-                    SizedBox(width: 20),
-                    _buildSetPosition(
-                      controller: _positionManager.highestRightFoot,
-                      title: 'Position maximale du pied droit',
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildSetPosition(
-                      controller: _positionManager.targetLeftFoot,
-                      title: 'Position cible du pied gauche',
-                    ),
-                    SizedBox(width: 20),
-                    _buildSetPosition(
-                      controller: _positionManager.targetRightFoot,
-                      title: 'Position cible du pied droit',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 40),
-            ElevatedButton(
-              onPressed:
-                  widget.isDrawer ||
-                      (_neurobioClient.isConnected &&
-                          !_isBusy &&
-                          _isFullyConfigured)
-                  ? () {
-                      if (widget.isDrawer) {
-                        Navigator.of(context).pop();
-                      } else {
-                        Navigator.of(
-                          context,
-                        ).pushReplacementNamed(FeedbackPage.routeName);
-                      }
-                    }
-                  : null,
-              child: Text(
-                widget.isDrawer ? 'Fermer' : 'Aller à la page de feedback',
+              SizedBox(height: 20),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildJointSetters(
+                    controller: _jointsManager.left,
+                    titleSuffix: 'du pied gauche',
+                  ),
+                  SizedBox(width: 20),
+                  _buildJointSetters(
+                    controller: _jointsManager.right,
+                    titleSuffix: 'du pied droit',
+                  ),
+                ],
               ),
-            ),
-          ],
+              SizedBox(height: 40),
+              if (!widget.isDrawer)
+                ElevatedButton(
+                  onPressed:
+                      widget.isDrawer ||
+                          (_neurobioClient.isConnected &&
+                              !_isBusy &&
+                              _isFullyConfigured)
+                      ? () {
+                          if (widget.isDrawer) {
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(
+                              context,
+                            ).pushReplacementNamed(FeedbackPage.routeName);
+                          }
+                        }
+                      : null,
+                  child: Text('Aller à la page de feedback'),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSetPosition({
-    required PositionController controller,
+  Widget _buildJointSetters({
+    required JointController controller,
+    required String titleSuffix,
+  }) {
+    return Column(
+      children: [
+        _buildSetIsEnabled(
+          controller: controller,
+          title: 'Activer $titleSuffix',
+        ),
+        _buildSetAngle(
+          channelIndex: controller.analogIndex,
+          controller: controller.lowest,
+          title: 'Angle minimal $titleSuffix',
+        ),
+        SizedBox(height: 10),
+        _buildSetAngle(
+          channelIndex: controller.analogIndex,
+          controller: controller.highest,
+          title: 'Angle maximal $titleSuffix',
+        ),
+        SizedBox(height: 10),
+        _buildSetAngle(
+          channelIndex: controller.analogIndex,
+          controller: controller.target,
+          title: 'Angle cible $titleSuffix',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSetIsEnabled({
+    required JointController controller,
     required String title,
   }) {
-    bool isAnalog = controller is AnalogPositionController;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: controller.isEnabled,
+          onChanged: (value) {
+            setState(() => controller.isEnabled = value ?? false);
+          },
+        ),
+        Text(title),
+      ],
+    );
+  }
+
+  Widget _buildSetAngle({
+    required int channelIndex,
+    required AngleController controller,
+    required String title,
+  }) {
+    bool isAnalog = controller is AnalogAngleController;
 
     return Container(
       decoration: BoxDecoration(
@@ -160,8 +184,12 @@ class _ConfigPageState extends State<ConfigPage> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
                   onPressed: _neurobioClient.isConnected && !_isBusy
-                      ? () async =>
-                            await _doSomething(() => _setVoltage(controller))
+                      ? () async => await _doSomething(
+                          () => _setVoltage(
+                            channelIndex: channelIndex,
+                            controller: controller,
+                          ),
+                        )
                       : null,
                   child: Text(
                     controller.voltage == null ? 'Mesurer' : 'Re-mesurer',
@@ -221,7 +249,10 @@ class _ConfigPageState extends State<ConfigPage> {
     await _neurobioClient.disconnect();
   }
 
-  Future<void> _setVoltage(AnalogPositionController controller) async {
+  Future<void> _setVoltage({
+    required int channelIndex,
+    required AnalogAngleController controller,
+  }) async {
     if (!_neurobioClient.isConnected ||
         !_neurobioClient.isConnectedToDelsysEmg) {
       _showErrorSnackBar(
@@ -244,7 +275,6 @@ class _ConfigPageState extends State<ConfigPage> {
       return;
     }
     // Compute the average voltage over the last second
-    final channelIndex = controller.emgIndex;
     final avgVoltage =
         data.delsysEmg
             .getData(raw: true)[channelIndex]

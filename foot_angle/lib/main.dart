@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foot_angle/managers/positions_manager.dart';
+import 'package:foot_angle/managers/joints_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
 import 'package:foot_angle/screens/feedback_page.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
@@ -25,7 +25,7 @@ Future<void> main() async {
       ? await NeurobioClientMock.instance.initialize()
       : await NeurobioClient.instance.initialize();
 
-  await PositionsManager.instance.initialize();
+  await JointsManager.instance.initialize();
   await PredictionsManager.instance.initialize();
 
   runApp(const MyApp());

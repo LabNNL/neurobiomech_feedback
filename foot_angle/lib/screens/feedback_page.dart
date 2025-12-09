@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foot_angle/managers/positions_manager.dart';
+import 'package:foot_angle/managers/joints_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
 import 'package:foot_angle/screens/foot_and_leg.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
@@ -18,7 +18,7 @@ class FeedbackPage extends StatefulWidget {
 class _FeedbackPageState extends State<FeedbackPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _neurobioClient = NeurobioClient.instance;
-  final _positionManager = PositionsManager.instance;
+  final _jointsManager = JointsManager.instance;
 
   double _leftData = 0.0;
   double _rightData = 0.0;
@@ -51,16 +51,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
     }
 
     final rawData = data.delsysEmg.getData(raw: true);
+    final leftIndex = _jointsManager.left.analogIndex;
+    final rightIndex = _jointsManager.right.analogIndex;
     final avgLeft =
-        rawData[_positionManager.leftFootEmgIndex].reduce(
-          (value, element) => value + element,
-        ) /
-        rawData[_positionManager.leftFootEmgIndex].length;
+        rawData[leftIndex].reduce((value, element) => value + element) /
+        rawData[leftIndex].length;
     final avgRight =
-        rawData[_positionManager.rightFootEmgIndex].reduce(
-          (value, element) => value + element,
-        ) /
-        rawData[_positionManager.rightFootEmgIndex].length;
+        rawData[rightIndex].reduce((value, element) => value + element) /
+        rawData[rightIndex].length;
     setState(() {
       _leftData = avgLeft;
       _rightData = avgRight;
@@ -88,8 +86,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 children: [
                   FootAndLeg(
                     side: FootAndLegSide.left,
-                    angle: _positionManager.leftAngleFromVoltage(_leftData),
-                    targetAngle: _positionManager.targetLeftFoot.angle ?? 0.0,
+                    angle: _jointsManager.left.angleFromVoltage(_leftData),
+                    targetAngle: _jointsManager.left.target.angle ?? 0.0,
                     errorTolerance: 15,
                     acceptedColor: Colors.green,
                     refusedColor: Colors.red,
@@ -97,8 +95,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   ),
                   FootAndLeg(
                     side: FootAndLegSide.right,
-                    angle: _positionManager.rightAngleFromVoltage(_rightData),
-                    targetAngle: _positionManager.targetRightFoot.angle ?? 0.0,
+                    angle: _jointsManager.right.angleFromVoltage(_rightData),
+                    targetAngle: _jointsManager.right.target.angle ?? 0.0,
                     errorTolerance: 15,
                     acceptedColor: Colors.green,
                     refusedColor: Colors.red,
@@ -112,7 +110,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
       ),
-      drawer: Drawer(width: 500, child: ConfigPage(isDrawer: true)),
+      drawer: Drawer(width: 600, child: ConfigPage(isDrawer: true)),
     );
   }
 }
@@ -126,7 +124,7 @@ class _DebugInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final neurobioClient = NeurobioClient.instance;
-    final positionManager = PositionsManager.instance;
+    final jointsManager = JointsManager.instance;
 
     return Center(
       child: Column(
@@ -142,25 +140,27 @@ class _DebugInformation extends StatelessWidget {
             ],
           ),
           Text(
-            'Configuration des positions du pied gauche : '
-            '[${positionManager.lowestLeftFoot.angle}, ${positionManager.targetLeftFoot.angle}, ${positionManager.highestLeftFoot.angle}] '
-            '(${positionManager.lowestLeftFoot.voltage?.toStringAsFixed(3)}, ${positionManager.leftVoltageFromAngle(positionManager.targetLeftFoot.angle ?? 0).toStringAsFixed(3)}, ${positionManager.highestLeftFoot.voltage?.toStringAsFixed(3)})',
+            'Configuration des angles de la cheville gauche : '
+            '[${jointsManager.left.lowest.angle}, '
+            '${jointsManager.left.target.angle}, '
+            '${jointsManager.left.highest.angle}] '
+            '(${jointsManager.left.lowest.voltage?.toStringAsFixed(3)}, '
+            '${jointsManager.left.angleFromVoltage(jointsManager.left.target.angle ?? 0).toStringAsFixed(3)}, '
+            '${jointsManager.left.highest.voltage?.toStringAsFixed(3)})',
           ),
           Text(
-            'Configuration des positions du pied droit : '
-            '[${positionManager.lowestRightFoot.angle}, ${positionManager.targetRightFoot.angle}, ${positionManager.highestRightFoot.angle}] '
-            '(${positionManager.lowestRightFoot.voltage?.toStringAsFixed(3)},  ${positionManager.rightVoltageFromAngle(positionManager.targetRightFoot.angle ?? 0).toStringAsFixed(3)}, ${positionManager.highestRightFoot.voltage?.toStringAsFixed(3)})',
+            'Configuration des angles de la cheville droite : '
+            '[${jointsManager.right.lowest.angle}, '
+            '${jointsManager.right.target.angle}, '
+            '${jointsManager.right.highest.angle}] '
+            '(${jointsManager.right.lowest.voltage?.toStringAsFixed(3)}, '
+            '${jointsManager.right.angleFromVoltage(jointsManager.right.target.angle ?? 0).toStringAsFixed(3)}, '
+            '${jointsManager.right.highest.voltage?.toStringAsFixed(3)})',
           ),
           Text(
-            'Position actuelle: ${positionManager.leftAngleFromVoltage(leftData).toStringAsFixed(3)} (${leftData.toStringAsFixed(3)}), '
-            '${positionManager.rightAngleFromVoltage(rightData).toStringAsFixed(3)} (${rightData.toStringAsFixed(3)})',
-          ),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed(ConfigPage.routeName);
-            },
-            child: Text('Configurer les positions'),
+            'Angles actuels: ${jointsManager.left.angleFromVoltage(leftData).toStringAsFixed(3)} '
+            '(${leftData.toStringAsFixed(3)}), '
+            '${jointsManager.right.angleFromVoltage(rightData).toStringAsFixed(3)} (${rightData.toStringAsFixed(3)})',
           ),
         ],
       ),
