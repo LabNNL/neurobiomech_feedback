@@ -1,6 +1,27 @@
 enum Side { left, right }
 
-enum Joint { ankle, knee }
+enum Joint {
+  ankle,
+  knee;
+
+  String get name {
+    switch (this) {
+      case Joint.ankle:
+        return 'Cheville';
+      case Joint.knee:
+        return 'Genou';
+    }
+  }
+
+  String titleSuffix({required Side side}) {
+    switch (this) {
+      case Joint.ankle:
+        return 'de la cheville ${side == Side.left ? 'gauche' : 'droite'}';
+      case Joint.knee:
+        return 'du genou ${side == Side.left ? 'gauche' : 'droit'}';
+    }
+  }
+}
 
 class AngleController {
   AngleController({this.angle});

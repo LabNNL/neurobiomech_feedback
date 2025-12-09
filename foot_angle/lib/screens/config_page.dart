@@ -64,17 +64,41 @@ class _ConfigPageState extends State<ConfigPage> {
                 ),
               ),
               SizedBox(height: 20),
+              DropdownButton(
+                items: [
+                  ...Joint.values.map(
+                    (joint) => DropdownMenuItem(
+                      value: joint,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(joint.name),
+                      ),
+                    ),
+                  ),
+                ],
+                value: _jointsManager.joint,
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _jointsManager.joint = value);
+                  }
+                },
+              ),
+              SizedBox(height: 20),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildJointSetters(
                     controller: _jointsManager.left,
-                    titleSuffix: 'de la cheville gauche',
+                    titleSuffix: _jointsManager.joint.titleSuffix(
+                      side: Side.left,
+                    ),
                   ),
                   SizedBox(width: 20),
                   _buildJointSetters(
                     controller: _jointsManager.right,
-                    titleSuffix: 'de la cheville droite',
+                    titleSuffix: _jointsManager.joint.titleSuffix(
+                      side: Side.right,
+                    ),
                   ),
                 ],
               ),

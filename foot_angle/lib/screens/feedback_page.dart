@@ -87,6 +87,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   if (_jointsManager.left.isEnabled)
                     JointPainter(
                       controller: _jointsManager.left,
+                      joint: _jointsManager.joint,
                       angle: _jointsManager.left.angleFromVoltage(_leftData),
                       acceptedColor: Colors.green,
                       almostColor: Colors.orange,
@@ -99,6 +100,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   if (_jointsManager.right.isEnabled)
                     JointPainter(
                       controller: _jointsManager.right,
+                      joint: _jointsManager.joint,
                       angle: _jointsManager.right.angleFromVoltage(_rightData),
                       acceptedColor: Colors.green,
                       almostColor: Colors.orange,
