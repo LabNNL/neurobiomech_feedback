@@ -1,3 +1,7 @@
+enum Side { left, right }
+
+enum Joint { ankle, knee }
+
 class AngleController {
   AngleController({this.angle});
 
@@ -22,11 +26,24 @@ class TargetAngleController extends AngleController {
 
   double tolerance;
   double almostTolerance;
+
+  bool isAngleAccepted(double testAngle) {
+    if (angle == null) return false;
+    return (testAngle >= angle! - tolerance) &&
+        (testAngle <= angle! + tolerance);
+  }
+
+  bool isAngleAlmostAccepted(double testAngle) {
+    if (angle == null) return false;
+    return (testAngle >= angle! - almostTolerance) &&
+        (testAngle <= angle! + almostTolerance);
+  }
 }
 
 class JointController {
-  JointController({required this.analogIndex});
+  JointController({required this.side, required this.analogIndex});
 
+  Side side;
   bool isEnabled = true;
   int analogIndex;
 
@@ -75,8 +92,6 @@ class JointController {
   }
 }
 
-enum Joint { ankle, knee }
-
 class JointsManager {
   JointsManager._();
   static final JointsManager instance = JointsManager._();
@@ -89,8 +104,8 @@ class JointsManager {
   }
 
   Joint joint = Joint.ankle;
-  final left = JointController(analogIndex: 0);
-  final right = JointController(analogIndex: 1);
+  final left = JointController(side: Side.left, analogIndex: 0);
+  final right = JointController(side: Side.right, analogIndex: 1);
 
   bool get isConfigured {
     if (!_isInitialized) {
