@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foot_angle/managers/joints_manager.dart';
 import 'package:foot_angle/screens/config_page.dart';
-import 'package:foot_angle/screens/foot_and_leg.dart';
+import 'package:foot_angle/widgets/joint_painter.dart';
 import 'package:frontend_fundamentals/managers/neurobio_client.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -85,7 +85,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_jointsManager.left.isEnabled)
-                    FootAndLeg(
+                    JointPainter(
                       side: FootAndLegSide.left,
                       angle: _jointsManager.left.angleFromVoltage(_leftData),
                       targetAngle: _jointsManager.left.target.angle ?? 0.0,
@@ -99,7 +99,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           MediaQuery.of(context).size.height * feetSizeFactor,
                     ),
                   if (_jointsManager.right.isEnabled)
-                    FootAndLeg(
+                    JointPainter(
                       side: FootAndLegSide.right,
                       angle: _jointsManager.right.angleFromVoltage(_rightData),
                       targetAngle: _jointsManager.right.target.angle ?? 0.0,

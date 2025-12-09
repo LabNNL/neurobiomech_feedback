@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
       routes: {
         ConfigPage.routeName: (context) => const ConfigPage(),
         FeedbackPage.routeName: (context) =>
-            const FeedbackPage(showDebugInformation: true),
+            const FeedbackPage(showDebugInformation: false),
       },
     );
   }

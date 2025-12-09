@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 enum FootAndLegSide { left, right }
 
-class FootAndLeg extends StatelessWidget {
-  const FootAndLeg({
+class JointPainter extends StatelessWidget {
+  const JointPainter({
     super.key,
     required this.side,
     required this.angle,
@@ -64,7 +64,6 @@ class FootAndLeg extends StatelessWidget {
                     dimensionSizedBox,
                     Image.asset('assets/images/leg.png'),
                     _buildFoot(angle: angle),
-                    //_buildFoot(angle: targetAngle, opacity: 0.4),
                     _buildFoot(
                       angle: targetAngle,
                       color: isAccepted
