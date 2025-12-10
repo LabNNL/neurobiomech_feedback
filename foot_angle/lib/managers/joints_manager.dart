@@ -109,7 +109,7 @@ class AnalogAngleController extends AngleController {
 
   @override
   Map<String, dynamic> get serialized =>
-      super.serialized..addAll({'voltage': _voltage});
+      super.serialized..addAll({'voltage': null});
 
   AnalogAngleController.fromSerialized(super.map)
     : _voltage = (map?['voltage'] as num?)?.toDouble(),
