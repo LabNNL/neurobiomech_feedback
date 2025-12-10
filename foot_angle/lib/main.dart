@@ -18,16 +18,21 @@ Future<void> main() async {
   const bool.fromEnvironment('USE_BACKEND_MOCK')
       ? await NeurobioClientMock.instance.initialize()
       : await NeurobioClient.instance.initialize();
+  const showDebugInformation = bool.fromEnvironment(
+    'SHOW_DEBUG_INFORMATION',
+    defaultValue: false,
+  );
 
   await JointsManager.instance.initialize();
   await PredictionsManager.instance.initialize();
 
-  runApp(const MyApp());
+  runApp(const MyApp(showDebugInformation: showDebugInformation));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.showDebugInformation});
 
+  final bool showDebugInformation;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -42,7 +47,7 @@ class MyApp extends StatelessWidget {
       routes: {
         ConfigPage.routeName: (context) => const ConfigPage(),
         FeedbackPage.routeName: (context) =>
-            const FeedbackPage(showDebugInformation: false),
+            FeedbackPage(showDebugInformation: showDebugInformation),
       },
     );
   }

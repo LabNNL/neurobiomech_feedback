@@ -12,7 +12,8 @@
             "flutterMode": "debug",
             "program": "foot_angle/lib/main.dart",
             "toolArgs": [
-                "--dart-define=USE_BACKEND_MOCK=true"
+                "--dart-define=USE_BACKEND_MOCK=< true | [false]>",
+                "--dart-define=SHOW_DEBUG_INFORMATION=< true | [false]>",
             ]
         },
     ]

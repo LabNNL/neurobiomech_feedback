@@ -53,12 +53,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final rawData = data.delsysEmg.getData(raw: true);
     final leftIndex = _jointsManager.left.analogIndex;
     final rightIndex = _jointsManager.right.analogIndex;
-    final avgLeft =
-        rawData[leftIndex].reduce((value, element) => value + element) /
-        rawData[leftIndex].length;
-    final avgRight =
-        rawData[rightIndex].reduce((value, element) => value + element) /
-        rawData[rightIndex].length;
+    final avgLeft = leftIndex == null
+        ? 0.0
+        : rawData[leftIndex].reduce((value, element) => value + element) /
+              rawData[leftIndex].length;
+    final avgRight = rightIndex == null
+        ? 0.0
+        : rawData[rightIndex].reduce((value, element) => value + element) /
+              rawData[rightIndex].length;
     setState(() {
       _leftData = avgLeft;
       _rightData = avgRight;
@@ -118,7 +120,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
       ),
-      drawer: Drawer(width: 600, child: ConfigPage(isDrawer: true)),
+      drawer: Drawer(width: 600, child: const ConfigPage(isDrawer: true)),
     );
   }
 }

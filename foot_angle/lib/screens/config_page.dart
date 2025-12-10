@@ -10,6 +10,10 @@ import 'package:logging/logging.dart';
 
 final _logger = Logger('ConfigPage');
 
+final _angleInputFormatter = FilteringTextInputFormatter.allow(
+  RegExp(r'(^-?\d*\.?\d{0,2})'),
+);
+
 class ConfigPage extends StatefulWidget {
   static const String routeName = '/config';
 
@@ -24,6 +28,8 @@ class ConfigPage extends StatefulWidget {
 class _ConfigPageState extends State<ConfigPage> {
   final _neurobioClient = NeurobioClient.instance;
   final _jointsManager = JointsManager.instance;
+
+  final _formKey = GlobalKey<FormState>();
 
   bool get _isFullyConfigured =>
       _neurobioClient.isConnected && _jointsManager.isConfigured;
@@ -45,85 +51,88 @@ class _ConfigPageState extends State<ConfigPage> {
       body: SingleChildScrollView(
         child: Align(
           alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 20),
-              Text('Connexion au serveur neurobiomech'),
-              SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: !_isBusy
-                    ? () async => await _doSomething(
-                        (_neurobioClient.isConnected
-                            ? _disconnectServer
-                            : _connectServer),
-                      )
-                    : null,
-                child: Text(
-                  _neurobioClient.isConnected ? 'Déconnexion' : 'Connexion',
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 20),
+                Text('Connexion au serveur neurobiomech'),
+                SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: !_isBusy
+                      ? () async => await _doSomething(
+                          (_neurobioClient.isConnected
+                              ? _disconnectServer
+                              : _connectServer),
+                        )
+                      : null,
+                  child: Text(
+                    _neurobioClient.isConnected ? 'Déconnexion' : 'Connexion',
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              DropdownButton(
-                items: [
-                  ...Joint.values.map(
-                    (joint) => DropdownMenuItem(
-                      value: joint,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(joint.name),
+                SizedBox(height: 20),
+                DropdownButton(
+                  items: [
+                    ...Joint.values.map(
+                      (joint) => DropdownMenuItem(
+                        value: joint,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(joint.name),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-                value: _jointsManager.joint,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _jointsManager.joint = value);
-                  }
-                },
-              ),
-              Text(_jointsManager.joint.direction),
-              SizedBox(height: 20),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildJointSetters(
-                    controller: _jointsManager.left,
-                    titleSuffix: _jointsManager.joint.titleSuffix(
-                      side: Side.left,
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  _buildJointSetters(
-                    controller: _jointsManager.right,
-                    titleSuffix: _jointsManager.joint.titleSuffix(
-                      side: Side.right,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 40),
-              if (!widget.isDrawer)
-                ElevatedButton(
-                  onPressed:
-                      widget.isDrawer ||
-                          (_neurobioClient.isConnected &&
-                              !_isBusy &&
-                              _isFullyConfigured)
-                      ? () {
-                          if (widget.isDrawer) {
-                            Navigator.of(context).pop();
-                          } else {
-                            Navigator.of(
-                              context,
-                            ).pushReplacementNamed(FeedbackPage.routeName);
-                          }
-                        }
-                      : null,
-                  child: Text('Aller à la page de feedback'),
+                  ],
+                  value: _jointsManager.joint,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _jointsManager.joint = value);
+                    }
+                  },
                 ),
-            ],
+                Text(_jointsManager.joint.direction),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildJointSetters(
+                      controller: _jointsManager.left,
+                      titleSuffix: _jointsManager.joint.titleSuffix(
+                        side: Side.left,
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    _buildJointSetters(
+                      controller: _jointsManager.right,
+                      titleSuffix: _jointsManager.joint.titleSuffix(
+                        side: Side.right,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 40),
+                if (!widget.isDrawer)
+                  ElevatedButton(
+                    onPressed:
+                        widget.isDrawer ||
+                            (_neurobioClient.isConnected &&
+                                !_isBusy &&
+                                _isFullyConfigured)
+                        ? () {
+                            if (widget.isDrawer) {
+                              Navigator.of(context).pop();
+                            } else {
+                              Navigator.of(
+                                context,
+                              ).pushReplacementNamed(FeedbackPage.routeName);
+                            }
+                          }
+                        : null,
+                    child: Text('Aller à la page de feedback'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -199,25 +208,33 @@ class _ConfigPageState extends State<ConfigPage> {
     required JointController controller,
     required String titleSuffix,
   }) {
+    int? channelIndex(value) {
+      final index = int.tryParse(value ?? '') ?? -1;
+      return index < 1 || index > 16 ? null : index - 1;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _formKey.currentState?.validate(),
+    );
+
     return SizedBox(
-      width: 60,
+      width: 100,
       child: TextFormField(
         decoration: InputDecoration(labelText: 'Canal'),
-        initialValue: controller.analogIndex.toString(),
-        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+        initialValue:
+            (controller.analogIndex == null ? '' : controller.analogIndex! + 1)
+                .toString(),
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (value) {
-          final index = int.tryParse(value);
-          if (index != null) {
-            setState(() => controller.analogIndex = index);
-          }
-        },
+        validator: (value) =>
+            channelIndex(value) == null ? 'Doit être entre 1 et 16' : null,
+        onChanged: (value) =>
+            setState(() => controller.analogIndex = channelIndex(value)),
       ),
     );
   }
 
   Widget _buildSetAnalog({
-    required int channelIndex,
+    required int? channelIndex,
     required bool isEnabled,
     required AnalogAngleController controller,
     required String title,
@@ -266,13 +283,9 @@ class _ConfigPageState extends State<ConfigPage> {
                 ),
                 enabled: isEnabled,
                 initialValue: controller.angle?.toString() ?? '',
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onChanged: (value) {
-                  final angle = double.tryParse(value);
-                  setState(() => controller.angle = angle);
-                },
+                inputFormatters: [_angleInputFormatter],
+                onChanged: (value) =>
+                    setState(() => controller.angle = double.tryParse(value)),
               ),
             ),
           ],
@@ -282,7 +295,7 @@ class _ConfigPageState extends State<ConfigPage> {
   }
 
   Widget _buildSetTarget({
-    required int channelIndex,
+    required int? channelIndex,
     required TargetAngleController controller,
     required bool isEnabled,
     required String title,
@@ -315,13 +328,10 @@ class _ConfigPageState extends State<ConfigPage> {
                     ),
                     enabled: isEnabled,
                     initialValue: controller.angle?.toString() ?? '',
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                    inputFormatters: [_angleInputFormatter],
+                    onChanged: (value) => setState(
+                      () => controller.angle = double.tryParse(value),
                     ),
-                    onChanged: (value) {
-                      final angle = double.tryParse(value);
-                      setState(() => controller.angle = angle);
-                    },
                   ),
                 ),
                 SizedBox(width: 20),
@@ -336,16 +346,11 @@ class _ConfigPageState extends State<ConfigPage> {
                           suffixText: '°',
                         ),
                         enabled: isEnabled,
-                        initialValue: controller.tolerance.toString(),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
+                        initialValue: controller.tolerance?.toString() ?? '',
+                        inputFormatters: [_angleInputFormatter],
+                        onChanged: (value) => setState(
+                          () => controller.tolerance = double.tryParse(value),
                         ),
-                        onChanged: (value) {
-                          final tolerance = double.tryParse(value);
-                          if (tolerance != null) {
-                            setState(() => controller.tolerance = tolerance);
-                          }
-                        },
                       ),
                     ),
                     SizedBox(
@@ -357,19 +362,14 @@ class _ConfigPageState extends State<ConfigPage> {
                           suffixText: '°',
                         ),
                         enabled: isEnabled,
-                        initialValue: controller.almostTolerance.toString(),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
+                        initialValue:
+                            controller.almostTolerance?.toString() ?? '',
+                        inputFormatters: [_angleInputFormatter],
+                        onChanged: (value) => setState(
+                          () => controller.almostTolerance = double.tryParse(
+                            value,
+                          ),
                         ),
-                        onChanged: (value) {
-                          final almostTolerance = double.tryParse(value);
-                          if (almostTolerance != null) {
-                            setState(
-                              () =>
-                                  controller.almostTolerance = almostTolerance,
-                            );
-                          }
-                        },
                       ),
                     ),
                   ],
@@ -413,13 +413,19 @@ class _ConfigPageState extends State<ConfigPage> {
   }
 
   Future<void> _setVoltage({
-    required int channelIndex,
+    required int? channelIndex,
     required AnalogAngleController controller,
   }) async {
     if (!_neurobioClient.isConnected ||
         !_neurobioClient.isConnectedToDelsysEmg) {
       _showErrorSnackBar(
         'Impossible de prendre la mesure : non connecté au serveur neurobiomech',
+      );
+      return;
+    }
+    if (channelIndex == null) {
+      _showErrorSnackBar(
+        'Impossible de prendre la mesure : canal non configuré',
       );
       return;
     }

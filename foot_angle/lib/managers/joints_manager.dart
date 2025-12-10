@@ -63,19 +63,21 @@ class TargetAngleController extends AngleController {
     required this.almostTolerance,
   });
 
-  double tolerance;
-  double almostTolerance;
+  double? tolerance;
+  double? almostTolerance;
 
   bool isAngleAccepted(double testAngle) {
-    if (angle == null) return false;
-    return (testAngle >= angle! - tolerance) &&
-        (testAngle <= angle! + tolerance);
+    if (angle == null || tolerance == null) return false;
+
+    return (testAngle >= angle! - tolerance!) &&
+        (testAngle <= angle! + tolerance!);
   }
 
   bool isAngleAlmostAccepted(double testAngle) {
-    if (angle == null) return false;
-    return (testAngle >= angle! - almostTolerance) &&
-        (testAngle <= angle! + almostTolerance);
+    if (angle == null || almostTolerance == null) return false;
+
+    return (testAngle >= angle! - almostTolerance!) &&
+        (testAngle <= angle! + almostTolerance!);
   }
 }
 
@@ -84,7 +86,7 @@ class JointController {
 
   Side side;
   bool isEnabled = true;
-  int analogIndex;
+  int? analogIndex;
 
   late final lowest = AnalogAngleController();
   late final highest = AnalogAngleController();
@@ -94,7 +96,11 @@ class JointController {
     almostTolerance: 30,
   );
 
-  bool get hasValue => lowest.hasValue && highest.hasValue && target.hasValue;
+  bool get hasValue =>
+      analogIndex != null &&
+      lowest.hasValue &&
+      highest.hasValue &&
+      target.hasValue;
 
   double angleFromVoltage(double voltage) => _linearInterpolate(
     voltage,
