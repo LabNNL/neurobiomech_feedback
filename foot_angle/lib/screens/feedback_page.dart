@@ -28,6 +28,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     super.initState();
 
     _neurobioClient.onNewLiveAnalogsData.addListener(_onNewData);
+    _jointsManager.onConfigurationChanged.addListener(_onCongigurationChanged);
 
     // On start, open the drawer where configuration can be done
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,8 +39,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
   @override
   void dispose() {
     _neurobioClient.onNewLiveAnalogsData.removeListener(_onNewData);
+    _jointsManager.onConfigurationChanged.removeListener(
+      _onCongigurationChanged,
+    );
     super.dispose();
   }
+
+  void _onCongigurationChanged() => setState(() {});
 
   void _onNewData() {
     final data = _neurobioClient.liveAnalogsData.copy();
@@ -86,7 +92,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (_jointsManager.left.isEnabled)
+                  if (_jointsManager.left.enabled)
                     JointPainter(
                       controller: _jointsManager.left,
                       joint: _jointsManager.joint,
@@ -98,8 +104,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         maxHeight:
                             MediaQuery.of(context).size.height * feetSizeFactor,
                       ),
+                      horizontalFlip: true,
                     ),
-                  if (_jointsManager.right.isEnabled)
+                  if (_jointsManager.right.enabled)
                     JointPainter(
                       controller: _jointsManager.right,
                       joint: _jointsManager.joint,
@@ -111,6 +118,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         maxHeight:
                             MediaQuery.of(context).size.height * feetSizeFactor,
                       ),
+                      horizontalFlip: false,
                     ),
                 ],
               ),

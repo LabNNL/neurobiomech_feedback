@@ -12,6 +12,7 @@ class JointPainter extends StatelessWidget {
     this.acceptedColor = Colors.green,
     this.almostColor = Colors.orange,
     this.refusedColor = Colors.red,
+    this.horizontalFlip = false,
     this.constraints,
   });
 
@@ -24,6 +25,7 @@ class JointPainter extends StatelessWidget {
   final Color almostColor;
   final Color refusedColor;
 
+  final bool horizontalFlip;
   final BoxConstraints? constraints;
 
   @override
@@ -31,7 +33,7 @@ class JointPainter extends StatelessWidget {
     final adjustedAngle = angle * joint.directionModifier;
 
     return Transform.flip(
-      flipX: controller.side == Side.left,
+      flipX: horizontalFlip,
       child: ConstraintsTransformBox(
         constraintsTransform: (cnts) => BoxConstraints(
           maxWidth: constraints?.maxWidth ?? cnts.maxWidth,

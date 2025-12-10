@@ -44,7 +44,9 @@ class _ConfigPageState extends State<ConfigPage> {
           if (widget.isDrawer)
             IconButton(
               icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                if (context.mounted) Navigator.of(context).pop();
+              },
             ),
         ],
       ),
@@ -115,14 +117,11 @@ class _ConfigPageState extends State<ConfigPage> {
                 if (!widget.isDrawer)
                   ElevatedButton(
                     onPressed:
-                        widget.isDrawer ||
-                            (_neurobioClient.isConnected &&
-                                !_isBusy &&
-                                _isFullyConfigured)
+                        _neurobioClient.isConnected &&
+                            !_isBusy &&
+                            _isFullyConfigured
                         ? () {
-                            if (widget.isDrawer) {
-                              Navigator.of(context).pop();
-                            } else {
+                            if (context.mounted) {
                               Navigator.of(
                                 context,
                               ).pushReplacementNamed(FeedbackPage.routeName);
@@ -145,7 +144,7 @@ class _ConfigPageState extends State<ConfigPage> {
   }) {
     return Column(
       children: [
-        _buildSetIsEnabled(
+        _buildSetEnabled(
           controller: controller,
           title: 'Utilisation $titleSuffix',
         ),
@@ -157,28 +156,28 @@ class _ConfigPageState extends State<ConfigPage> {
         _buildSetAnalog(
           channelIndex: controller.analogIndex,
           controller: controller.lowest,
-          isEnabled: controller.isEnabled,
+          enabled: controller.enabled,
           title: 'Angle minimal $titleSuffix',
         ),
         SizedBox(height: 10),
         _buildSetAnalog(
           channelIndex: controller.analogIndex,
           controller: controller.highest,
-          isEnabled: controller.isEnabled,
+          enabled: controller.enabled,
           title: 'Angle maximal $titleSuffix',
         ),
         SizedBox(height: 10),
         _buildSetTarget(
           channelIndex: controller.analogIndex,
           controller: controller.target,
-          isEnabled: controller.isEnabled,
+          enabled: controller.enabled,
           title: 'Angle cible $titleSuffix',
         ),
       ],
     );
   }
 
-  Widget _buildSetIsEnabled({
+  Widget _buildSetEnabled({
     required JointController controller,
     required String title,
   }) {
@@ -186,15 +185,15 @@ class _ConfigPageState extends State<ConfigPage> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          setState(() => controller.isEnabled = !controller.isEnabled);
+          setState(() => controller.enabled = !controller.enabled);
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Checkbox(
-              value: controller.isEnabled,
+              value: controller.enabled,
               onChanged: (value) {
-                setState(() => controller.isEnabled = value ?? false);
+                setState(() => controller.enabled = value ?? false);
               },
             ),
             Text(title),
@@ -221,12 +220,12 @@ class _ConfigPageState extends State<ConfigPage> {
       width: 100,
       child: TextFormField(
         decoration: InputDecoration(labelText: 'Canal'),
+        enabled: controller.enabled,
         initialValue:
             (controller.analogIndex == null ? '' : controller.analogIndex! + 1)
                 .toString(),
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        validator: (value) =>
-            channelIndex(value) == null ? 'Doit être entre 1 et 16' : null,
+        validator: (value) => channelIndex(value) == null ? 'De 1 à 16' : null,
         onChanged: (value) =>
             setState(() => controller.analogIndex = channelIndex(value)),
       ),
@@ -235,7 +234,7 @@ class _ConfigPageState extends State<ConfigPage> {
 
   Widget _buildSetAnalog({
     required int? channelIndex,
-    required bool isEnabled,
+    required bool enabled,
     required AnalogAngleController controller,
     required String title,
   }) {
@@ -251,7 +250,7 @@ class _ConfigPageState extends State<ConfigPage> {
             Text(
               title,
               style: TextStyle(
-                color: !_neurobioClient.isConnected || !isEnabled
+                color: !_neurobioClient.isConnected || !enabled
                     ? Colors.grey
                     : (controller.voltage == null)
                     ? Colors.red
@@ -261,7 +260,7 @@ class _ConfigPageState extends State<ConfigPage> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: ElevatedButton(
-                onPressed: _neurobioClient.isConnected && !_isBusy && isEnabled
+                onPressed: _neurobioClient.isConnected && !_isBusy && enabled
                     ? () async => await _doSomething(
                         () => _setVoltage(
                           channelIndex: channelIndex,
@@ -281,7 +280,7 @@ class _ConfigPageState extends State<ConfigPage> {
                   labelText: 'Angle',
                   suffixText: '°',
                 ),
-                enabled: isEnabled,
+                enabled: enabled,
                 initialValue: controller.angle?.toString() ?? '',
                 inputFormatters: [_angleInputFormatter],
                 onChanged: (value) =>
@@ -297,7 +296,7 @@ class _ConfigPageState extends State<ConfigPage> {
   Widget _buildSetTarget({
     required int? channelIndex,
     required TargetAngleController controller,
-    required bool isEnabled,
+    required bool enabled,
     required String title,
   }) {
     return Container(
@@ -312,7 +311,7 @@ class _ConfigPageState extends State<ConfigPage> {
             Text(
               title,
               style: TextStyle(
-                color: !_neurobioClient.isConnected || !isEnabled
+                color: !_neurobioClient.isConnected || !enabled
                     ? Colors.grey
                     : Colors.green,
               ),
@@ -326,7 +325,7 @@ class _ConfigPageState extends State<ConfigPage> {
                       labelText: 'Angle',
                       suffixText: '°',
                     ),
-                    enabled: isEnabled,
+                    enabled: enabled,
                     initialValue: controller.angle?.toString() ?? '',
                     inputFormatters: [_angleInputFormatter],
                     onChanged: (value) => setState(
@@ -345,7 +344,7 @@ class _ConfigPageState extends State<ConfigPage> {
                           prefix: Text('± '),
                           suffixText: '°',
                         ),
-                        enabled: isEnabled,
+                        enabled: enabled,
                         initialValue: controller.tolerance?.toString() ?? '',
                         inputFormatters: [_angleInputFormatter],
                         onChanged: (value) => setState(
@@ -361,7 +360,7 @@ class _ConfigPageState extends State<ConfigPage> {
                           prefix: Text('± '),
                           suffixText: '°',
                         ),
-                        enabled: isEnabled,
+                        enabled: enabled,
                         initialValue:
                             controller.almostTolerance?.toString() ?? '',
                         inputFormatters: [_angleInputFormatter],
