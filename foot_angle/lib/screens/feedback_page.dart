@@ -128,7 +128,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
       ),
-      drawer: Drawer(width: 600, child: const ConfigPage(isDrawer: true)),
+      drawer: Drawer(width: 650, child: const ConfigPage(isDrawer: true)),
     );
   }
 }
